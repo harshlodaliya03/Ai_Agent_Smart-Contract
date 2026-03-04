@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+groq
+python-dotenv
+pydantic
+python-multipart
+motor
+dnspython
+shutil
+marked
+requests

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Contract Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="glass-panel login-panel">
+            <div class="welcome-section">
+                <div class="welcome-icon">👋</div>
+                <h2 id="welcome-title">Hi there!</h2>
+                <p class="login-rationale">
+                    Connect your wallet to get started:
+                </p>
+                <ul class="benefit-list">
+                    <li><i class="fa-solid fa-check"></i> Save your Audit History</li>
+                    <li><i class="fa-solid fa-check"></i> Track Solidity Learning XP</li>
+                    <li><i class="fa-solid fa-check"></i> Access the Project Architect</li>
+                </ul>
+            </div>
+            <button id="connect-wallet-btn" class="analyze-btn ready" style="width: 100%;">
+                <span class="btn-text-content"><i class="fa-solid fa-plug"></i> Connect & Start</span>
+            </button>
+            <div id="login-error" class="error-message" style="margin-top: 1rem;"><i
+                    class="fa-solid fa-circle-exclamation"></i> <span id="login-error-text"></span></div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app-container" class="app-container" style="display: none;">
+
+        <!-- Sidebar -->
+        <aside class="sidebar glass-panel">
+            <div class="sidebar-header">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> History</h3>
+                <button class="new-chat-btn" id="new-chat-btn" title="New Session"><i
+                        class="fa-solid fa-pen-to-square"></i></button>
+            </div>
+            <div class="sidebar-list" id="history-list">
+                <!-- History Items go here -->
+            </div>
+            <div class="sidebar-footer">
+                <div class="wallet-badge" id="wallet-badge"><i class="fa-solid fa-link"></i> <span>0x...</span></div>
+                <button id="disconnect-btn" class="disconnect-btn" title="Disconnect"><i
+                        class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content-wrapper">
+            <header>
+            </header>
+
+            <main>
+                <div class="tabs">
+                    <button class="tab-btn active" id="tab-audit">Audit Contract</button>
+                    <button class="tab-btn" id="tab-generate">Generate Contract</button>
+                    <button class="tab-btn" id="tab-architect">Project Architect</button>
+                    <button class="tab-btn" id="tab-learn">Learn Solidity</button>
+                </div>
+
+                <!-- Audit Tab Content -->
+                <div class="tab-content active" id="content-audit">
+                    <div class="glass-panel">
+                        <div class="upload-area" id="drop-zone">
+                            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                            <div class="upload-text">Drag & Drop your .sol file</div>
+                            <div class="upload-subtext">or click to browse</div>
+                            <input type="file" id="file-input" accept=".sol">
+                        </div>
+
+                        <div class="selected-file" id="file-display">
+                            <i class="fa-brands fa-ethereum" style="color: #000; font-size: 1.5rem;"></i>
+                            <span class="file-name" id="file-name">No file selected</span>
+                            <i class="fa-solid fa-check" style="color: #000;"></i>
+                        </div>
+
+                        <!-- Agent Selection UI -->
+                        <div class="agent-select-container">
+                            <label for="agent-select">Select Analysis Type:</label>
+                            <select id="agent-select" class="agent-select">
+                                <option value="all">Full Audit (All Agents)</option>
+                                <option value="vulnerability">Vulnerability Analysis Only</option>
+                                <option value="gas">Gas Optimization Only</option>
+                                <option value="fix">Fix Generation Only</option>
+                            </select>
+                        </div>
+
+                        <div class="error-message" id="error-msg">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span id="error-text">An error occurred</span>
+                        </div>
+
+                        <button class="analyze-btn" id="analyze-btn">
+                            <span class="btn-text-content"><i class="fa-solid fa-magnifying-glass"></i> Analyze Smart
+                                Contract</span>
+                            <span class="btn-text-content" style="display: none;">Analyzing...</span>
+                            <div class="spinner"></div>
+                        </button>
+                    </div>
+
+                    <div id="results">
+                        <div class="glass-panel">
+                            <div class="result-grid">
+
+                                <div class="score-card" id="score-card">
+                                    <div class="score-info">
+                                        <h3>Security Score</h3>
+                                        <p style="color:#555; font-size: 0.9rem; font-weight: 600;">Out of 100</p>
+                                    </div>
+                                    <div class="score-value score-high" id="score-val">--</div>
+                                </div>
+
+                                <div class="report-section" id="vuln-section">
+                                    <h3><i class="fa-solid fa-shield-halved"></i> Vulnerability Analysis</h3>
+                                    <div class="report-content" id="vuln-report">Waiting for analysis...</div>
+                                </div>
+
+                                <div class="report-section" id="gas-section">
+                                    <h3><i class="fa-solid fa-gas-pump"></i> Gas Optimization</h3>
+                                    <div class="report-content" id="gas-report">Waiting for analysis...</div>
+                                </div>
+
+                                <div class="report-section" id="fix-section">
+                                    <h3><i class="fa-solid fa-wrench"></i> Fixed Contract</h3>
+                                    <div class="code-container">
+                                        <div class="code-header">
+                                            <span class="code-title">fixed_contract.sol</span>
+                                            <button class="copy-btn" id="copy-btn" title="Copy to clipboard">
+                                                <i class="fa-regular fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <pre><code id="fixed-code">// Fixed code will appear here after analysis</code></pre>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Tab Content -->
+                <div class="tab-content" id="content-generate">
+                    <div class="glass-panel">
+                        <h2>Create a Smart Contract</h2>
+                        <p style="color: #555; margin-bottom: 1.5rem; font-size: 0.95rem; font-weight: 600;">
+                            Describe what you want your contract to do. Our AI will help clarify unclear prompts before
+                            generating secure Solidity code.
+                        </p>
+                        <textarea class="prompt-input" id="generate-prompt"
+                            placeholder="E.g., Create a simple ERC20 token named 'MyToken' with symbol 'MTK' and initial supply 10000. It should have mint and burn functions restricted to the owner..."></textarea>
+
+                        <div class="clarification-box" id="clarification-box">
+                            <div class="clarification-title">
+                                <i class="fa-solid fa-lightbulb"></i> Prompt Clarification Suggestion
+                            </div>
+                            <p style="color: #555; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem;">Your
+                                initial
+                                prompt was a bit vague. Is this what you meant?</p>
+                            <div class="clarification-text" id="clarification-text"></div>
+                            <div class="clarification-actions">
+                                <button class="btn-confirm" id="btn-confirm-prompt">Yes, Generate This</button>
+                                <button class="btn-edit" id="btn-edit-prompt">No, I will edit</button>
+                            </div>
+                        </div>
+
+                        <div class="error-message" id="gen-error-msg">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span id="gen-error-text">An error occurred</span>
+                        </div>
+
+                        <button class="analyze-btn ready" id="generate-btn">
+                            <span class="btn-text-content"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                                Code</span>
+                            <span class="btn-text-content" style="display: none;">Processing...</span>
+                            <div class="spinner"></div>
+                        </button>
+                    </div>
+
+                    <!-- Generate Results Area -->
+                    <div id="generate-results" style="display: none; width: 100%; margin-top: 2rem;">
+                        <div class="glass-panel">
+                            <div class="report-section">
+                                <h3><i class="fa-solid fa-code"></i> Generated Contract</h3>
+                                <div class="code-container">
+                                    <div class="code-header">
+                                        <span class="code-title" id="gen-code-title">GeneratedContract.sol</span>
+                                        <button class="copy-btn" id="gen-copy-btn" title="Copy to clipboard">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre><code id="generated-code">// Code will appear here</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Architect Tab Content -->
+                <div class="tab-content" id="content-architect">
+                    <div class="glass-panel">
+                        <h2>Blockchain Project Architect</h2>
+                        <p style="color:var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            Explain your project idea and the tools you want to use. Our AI Architect will generate a
+                            complete, production-ready A-to-Z implementation guide.
+                        </p>
+                        <textarea class="prompt-input" id="architect-prompt"
+                            placeholder="E.g., I want to build a decentralized crowdfunding platform using Next.js, Solidity, and Hardhat. Users should be able to create campaigns, contribute ETH, and milestones should be approved by contributors..."></textarea>
+
+                        <div class="error-message" id="arch-error-msg">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span id="arch-error-text">An error occurred</span>
+                        </div>
+
+                        <button class="analyze-btn ready" id="architect-btn">
+                            <span class="btn-text-content"><i class="fa-solid fa-compass"></i> Generate Roadmap</span>
+                            <span class="btn-text-content" style="display: none;">Architecting...</span>
+                            <div class="spinner"></div>
+                        </button>
+                    </div>
+
+                    <!-- Architect Results Area -->
+                    <div id="architect-results" style="display: none; width: 100%; margin-top: 2rem;">
+                        <div class="glass-panel">
+                            <div class="arch-result-header">
+                                <h3><i class="fa-solid fa-map"></i> Implementation Roadmap</h3>
+                                <button class="arch-copy-btn" id="arch-copy-roadmap-btn">
+                                    <i class="fa-regular fa-copy"></i> Copy Guide
+                                </button>
+                            </div>
+                            <div class="report-content" id="architect-roadmap">Waiting for roadmap...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learn Solidity Tab Content -->
+                <div class="tab-content" id="content-learn">
+                    <div class="learning-header">
+                        <div class="user-stats glass-panel">
+                            <div class="stat-item">
+                                <span class="stat-label">Level</span>
+                                <span class="stat-value" id="user-level">1</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">XP</span>
+                                <span class="stat-value" id="user-xp">0</span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="xp-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="badges-container glass-panel" id="user-badges">
+                            <!-- Badges will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Concept Selector -->
+                    <div class="glass-panel" id="learning-setup">
+                        <h2>Master Solidity</h2>
+                        <p style="color:var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            Select concepts to learn, choose a difficulty, and generate real-world challenges.
+                        </p>
+
+                        <div class="concepts-grid">
+                            <div class="concept-category">
+                                <h3>🟦 Basics</h3>
+                                <div class="concept-options">
+                                    <label><input type="checkbox" name="concept" value="pragma"> pragma</label>
+                                    <label><input type="checkbox" name="concept" value="state variables"> state
+                                        variables</label>
+                                    <label><input type="checkbox" name="concept" value="local variables"> local
+                                        variables</label>
+                                    <label><input type="checkbox" name="concept" value="visibility"> visibility</label>
+                                    <label><input type="checkbox" name="concept" value="functions"> functions</label>
+                                    <label><input type="checkbox" name="concept" value="constructors">
+                                        constructors</label>
+                                    <label><input type="checkbox" name="concept" value="modifiers"> modifiers</label>
+                                </div>
+                            </div>
+                            <div class="concept-category">
+                                <h3>🟦 Intermediate</h3>
+                                <div class="concept-options">
+                                    <label><input type="checkbox" name="concept" value="mappings"> mappings </label>
+                                    <label><input type="checkbox" name="concept" value="arrays"> arrays</label>
+                                    <label><input type="checkbox" name="concept" value="structs"> structs</label>
+                                    <label><input type="checkbox" name="concept" value="events"> events</label>
+                                    <label><input type="checkbox" name="concept" value="require / revert"> require /
+                                        revert</label>
+                                    <label><input type="checkbox" name="concept" value="custom errors"> custom
+                                        errors</label>
+                                </div>
+                            </div>
+                            <div class="concept-category">
+                                <h3>🟦 Advanced</h3>
+                                <div class="concept-options">
+                                    <label><input type="checkbox" name="concept" value="inheritance">
+                                        inheritance</label>
+                                    <label><input type="checkbox" name="concept" value="interfaces"> interfaces</label>
+                                    <label><input type="checkbox" name="concept" value="abstract contracts"> abstract
+                                        contracts</label>
+                                    <label><input type="checkbox" name="concept" value="libraries"> libraries</label>
+                                    <label><input type="checkbox" name="concept" value="fallback / receive"> fallback /
+                                        receive</label>
+                                    <label><input type="checkbox" name="concept" value="access control"> access
+                                        control</label>
+                                    <label><input type="checkbox" name="concept" value="reentrancy"> reentrancy</label>
+                                    <label><input type="checkbox" name="concept" value="upgradeable contracts">
+                                        upgradeable</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="learning-controls">
+                            <div class="control-group">
+                                <label>Difficulty:</label>
+                                <select id="learn-difficulty">
+                                    <option value="easy">Easy (10 XP)</option>
+                                    <option value="medium">Medium (25 XP)</option>
+                                    <option value="hard">Hard (50 XP)</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label>Tasks:</label>
+                                <select id="learn-task-count">
+                                    <option value="1">1 Task</option>
+                                    <option value="3" selected>3 Tasks</option>
+                                    <option value="5">5 Tasks</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="analyze-btn ready" id="learn-generate-btn">
+                            <span class="btn-text-content"><i class="fa-solid fa-graduation-cap"></i> Generate Learning
+                                Tasks</span>
+                            <span class="btn-text-content" style="display: none;">Creating Journey...</span>
+                            <div class="spinner"></div>
+                        </button>
+                    </div>
+
+                    <!-- Active Tasks Grid -->
+                    <div id="learning-tasks-container" style="display: none; margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem;"><i class="fa-solid fa-list-check"></i> Current Challenges</h3>
+                        <div class="tasks-grid" id="tasks-list">
+                            <!-- Task cards will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Single Task Solver View (Hidden by default) -->
+                    <div id="task-solver-view" style="display: none; margin-top: 2rem;">
+                        <button class="back-btn" id="back-to-tasks"><i class="fa-solid fa-arrow-left"></i> Back to
+                            Tasks</button>
+                        <div class="glass-panel" style="margin-top: 1rem;">
+                            <h2 id="current-task-title">Task Title</h2>
+                            <div class="task-description-box">
+                                <p id="current-task-desc">Task description goes here...</p>
+                                <div id="current-task-requirements" class="task-list"></div>
+                                <div id="current-task-constraints" class="task-list"></div>
+                            </div>
+
+                            <div class="code-container" style="margin-top: 1.5rem;">
+                                <div class="code-header">
+                                    <span class="code-title">Solution.sol</span>
+                                    <span id="compiler-status" class="compiler-status">Ready</span>
+                                </div>
+                                <textarea id="solution-editor" class="solution-editor" spellcheck="false"
+                                    placeholder="// Write your Solidity solution here..."></textarea>
+                            </div>
+
+                            <div id="review-feedback" class="feedback-box" style="display: none;">
+                                <!-- AI feedback goes here -->
+                            </div>
+
+                            <button class="analyze-btn ready" id="submit-solution-btn">
+                                <span class="btn-text-content"><i class="fa-solid fa-paper-plane"></i> Submit
+                                    Solution</span>
+                                <span class="btn-text-content" style="display: none;">Reviewing...</span>
+                                <div class="spinner"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Tech Selection Modal -->
+    <div class="modal" id="tech-selection-modal">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-microchip"></i> Setup Your Project Stack</h3>
+                <button class="close-modal" id="close-tech-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="project-summary-box">
+                    <strong>Project Summary:</strong>
+                    <p id="modal-project-summary">Analyzing your idea...</p>
+                </div>
+
+                <div class="selection-grid">
+                    <div class="selection-group">
+                        <label>Blockchain Framework</label>
+                        <div class="checkbox-group" id="group-blockchain"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Local Network</label>
+                        <div class="checkbox-group" id="group-network"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Frontend Framework</label>
+                        <div class="checkbox-group" id="group-frontend"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Styling & UI</label>
+                        <div class="checkbox-group" id="group-styling"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Database Storage</label>
+                        <div class="checkbox-group" id="group-database"></div>
+                    </div>
+
+                    <div class="selection-group">
+                        <label>Wallet Integration</label>
+                        <div class="checkbox-group" id="group-wallet"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Decentralized Storage</label>
+                        <div class="checkbox-group" id="group-storage"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Backend (Optional)</label>
+                        <div class="checkbox-group" id="group-backend"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Indexing & Query</label>
+                        <div class="checkbox-group" id="group-indexing"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Authentication</label>
+                        <div class="checkbox-group" id="group-auth"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Deployment</label>
+                        <div class="checkbox-group" id="group-deployment"></div>
+                    </div>
+                    <div class="selection-group">
+                        <label>Monitoring & Security</label>
+                        <div class="checkbox-group" id="group-security"></div>
+                    </div>
+                </div>
+
+
+                <div class="selection-group" style="margin-top: 1.5rem;">
+                    <label>Experience Level</label>
+                    <select id="experience-level" class="agent-select"
+                        style="width: 100%; border: 2px solid #000; padding: 0.8rem; background: #fff; color: #000; font-weight: 700;">
+                        <option value="beginner">Beginner (Detailed explanations)</option>
+                        <option value="intermediate" selected>Intermediate (Standard guide)</option>
+                        <option value="advanced">Advanced (Concise, code-heavy)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="analyze-btn ready" id="btn-final-generate">
+                    <span class="btn-text-content"><i class="fa-solid fa-rocket"></i> Build Full Roadmap</span>
+                    <span class="btn-text-content" style="display: none;">Generating...</span>
+                    <div class="spinner"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
