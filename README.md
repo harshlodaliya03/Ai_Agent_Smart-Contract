@@ -1,28 +1,30 @@
-# 🤖 Smart Contract Suite
+# Smart Contract Suite
 
 A powerful local-first platform for **Auditing**, **Generating**, and **Architecting** smart contracts, powered by specialized AI agents and the **Model Context Protocol (MCP)**.
 
----
-
-## ✨ Features
-
--   🛡 **Smart Contract Audit**: High-speed security analysis using **Slither** and specialized AI agents.
--   💻 **Contract Generator**: Senior-level Solidity generation with 2-step requirement verification.
--   🏗 **Project Architect**: 12-layer technical roadmaps for building full-stack dApps.
--   🎓 **Learning Platform**: Gamified Solidity challenges with real-time compiler feedback.
--   📜 **History Management**: Persistent local storage of every audit and generation.
+[**Project Demo (Google Drive)**](https://drive.google.com/drive/folders/16PrBWFd7eIE6ZZK2xW-te51mQItcWv2Q?usp=drive_link)
 
 ---
 
-## 🚀 Local Setup Guide
+## Features
+
+-   Smart Contract Audit: High-speed security analysis using **Slither** and specialized AI agents.
+-   Contract Generator: Senior-level Solidity generation with 2-step requirement verification.
+-   Project Architect: 12-layer technical roadmaps for building full-stack dApps.
+-   Learning Platform: Gamified Solidity challenges with real-time compiler feedback.
+-   History Management: Persistent local storage of every audit and generation.
+
+---
+
+## Local Setup Guide
 
 Follow these steps to get the platform running on your local machine.
 
 ### 1. Prerequisites
-- **Python 3.12** (Required for the MCP Tool Server)
-- **Python 3.9+** (For the main Web Application)
-- **Solidity (solc)**: Follow [Solidity Installation](https://docs.soliditylang.org/en/latest/installing-solidity.html) or use `brew install solidity`.
-- **Slither**: `pip install slither-analyzer`
+- Python 3.12 (Required for the MCP Tool Server)
+- Python 3.9+ (For the main Web Application)
+- Solidity (solc): Follow [Solidity Installation](https://docs.soliditylang.org/en/latest/installing-solidity.html) or use brew install solidity.
+- Slither: pip install slither-analyzer
 
 ### 2. Installation
 
@@ -54,7 +56,7 @@ pip install mcp slither-analyzer web3 fastapi uvicorn requests solc-select
    ```bash
    cp .env.example .env
    ```
-2. Open `.env` and add your **Groq API Key**.
+2. Open .env and add your **Groq API Key**.
 
 ### 4. Running the Platform
 
@@ -80,10 +82,10 @@ Open your browser and navigate to:
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- **Backend**: FastAPI, Python (Agents)
-- **Frontend**: Vanilla HTML/CSS/JS (Brutalist Monochrome Theme)
-- **Toolbox**: Slither, Solc, Web3.js
-- **Intelligence**: Model Context Protocol (MCP), Groq (Llama 3.3)
-- **Database**: SQLite (Local Persistence)
+- Backend: FastAPI, Python (Agents)
+- Frontend: Vanilla HTML/CSS/JS (Brutalist Monochrome Theme)
+- Toolbox: Slither, Solc, Web3.js
+- Intelligence: Model Context Protocol (MCP), Groq (Llama 3.3)
+- Database: SQLite (Local Persistence)
